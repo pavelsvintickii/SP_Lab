@@ -293,7 +293,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         newElem.memory = 0;
                         newElem.cost = 0;
                         int markIndex = 0;
-                        int mark[3] = { 0, 0, 0 };
+                        int mark[4] = { 0, 0, 0, 0 };
                         while (text[index] != L'\n' && text[index] != L'\0')
                         {
                             if (text[index] != L'#')
