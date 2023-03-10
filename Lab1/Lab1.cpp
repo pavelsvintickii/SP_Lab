@@ -66,6 +66,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    DlgProcAdd(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    DlgProcSearchCPU(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK    DlgProcSearchRAM(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -391,11 +392,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 InvalidateRect(hWnd, NULL, TRUE);
                 UpdateWindow(hWnd);
                 break;
-            /*case ID_INFO_RAM:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_SEARCH_RAM), hWnd, DlgProcAdd);
+            case ID_INFO_RAM:
+                DialogBox(hInst, MAKEINTRESOURCE(IDD_SEARCH_RAM), hWnd, DlgProcSearchRAM);
                 InvalidateRect(hWnd, NULL, TRUE);
                 UpdateWindow(hWnd);
-                break;*/
+                break;
             case ID_INFO_RESET:
                 CPUFind = CPUFlags::not_selected;
                 RAMFind = RAMFlags::not_selected;
@@ -613,7 +614,7 @@ INT_PTR CALLBACK DlgProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
     return (INT_PTR)FALSE;
 }
 
-HWND hI5, hI7, hAMD, hOther, hText;
+HWND hText;
 RAMFlags RAMFindNew = (RAMFlags)0;
 CPUFlags CPUFindNew = (CPUFlags)0;
 
@@ -622,10 +623,6 @@ INT_PTR CALLBACK DlgProcSearchCPU(HWND hWnd, UINT message, WPARAM wParam, LPARAM
     switch (message)
     {
     case WM_INITDIALOG:
-        hI5 = GetDlgItem(hWnd, IDC_SEARCH_CPU_I5_RADIO);
-        hI7 = GetDlgItem(hWnd, IDC_SEARCH_CPU_I7_RADIO);
-        hAMD = GetDlgItem(hWnd, IDC_SEARCH_CPU_AMD_RADIO);
-        hOther = GetDlgItem(hWnd, IDC_SEARCH_CPU_OTHER_RADIO);
         hText = GetDlgItem(hWnd, IDC_SEARCH_CPU_OTHER);
         CPUFindNew = CPUFind;
         SetWindowTextW(hText, CPUName);
@@ -655,6 +652,59 @@ INT_PTR CALLBACK DlgProcSearchCPU(HWND hWnd, UINT message, WPARAM wParam, LPARAM
             SendMessage(hWnd, WM_CLOSE, 0, 0);
             break;
         case IDC_SEARCH_CPU_CANCEL:
+            SendMessage(hWnd, WM_CLOSE, 0, 0);
+            break;
+        }
+        return (INT_PTR)TRUE;
+    case WM_CLOSE:
+        EndDialog(hWnd, 0);
+        return (INT_PTR)TRUE;
+    }
+    return (INT_PTR)FALSE;
+}
+
+INT_PTR CALLBACK DlgProcSearchRAM(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        hText = GetDlgItem(hWnd, IDC_SEARCH_RAM_OTHER);
+        RAMFindNew = RAMFind;
+        SetWindowTextW(hText, RAMName);
+        return (INT_PTR)TRUE;
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDC_SEARCH_1GB_RADIO:
+            RAMFindNew = RAMFlags::GB1;
+            EnableWindow(hText, FALSE);
+            break;
+        case IDC_SEARCH_2GB_RADIO:
+            RAMFindNew = RAMFlags::GB2;
+            EnableWindow(hText, FALSE);
+            break;
+        case IDC_SEARCH_4GB_RADIO:
+            RAMFindNew = RAMFlags::GB4;
+            EnableWindow(hText, FALSE);
+            break;
+        case IDC_SEARCH_8GB_RADIO:
+            RAMFindNew = RAMFlags::GB8;
+            EnableWindow(hText, FALSE);
+            break;
+        case IDC_SEARCH_16GB_RADIO:
+            RAMFindNew = RAMFlags::GB16;
+            EnableWindow(hText, FALSE);
+            break;
+        case IDC_SEARCH_RAM_OTHER_RADIO:
+            RAMFindNew = RAMFlags::others;
+            EnableWindow(hText, TRUE);
+            break;
+        case IDC_SEARCH_RAM_CONFIRM:
+            RAMFind = RAMFindNew;
+            if (RAMFind == RAMFlags::others) GetDlgItemText(hWnd, IDC_SEARCH_RAM_OTHER, RAMName, MaxLength);
+            SendMessage(hWnd, WM_CLOSE, 0, 0);
+            break;
+        case IDC_SEARCH_RAM_CANCEL:
             SendMessage(hWnd, WM_CLOSE, 0, 0);
             break;
         }

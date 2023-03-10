@@ -17,6 +17,7 @@
 #define IDI_SMALL                       108
 #define IDD_SEARCH_CPU                  108
 #define IDC_LAB1                        109
+#define IDD_SEARCH_RAM                  109
 #define IDR_MAINFRAME                   128
 #define IDR_MENU1                       129
 #define IDR_ACCELERATOR1                130
@@ -39,6 +40,16 @@
 #define IDC_SEARCH_CPU_OTHER            1023
 #define IDC_SEARCH_CPU_CONFIRM          1024
 #define IDC_SEARCH_CPU_CANCEL           1025
+#define IDC_RAM_1GB_RADIO               1027
+#define IDC_SEARCH_1GB_RADIO            1027
+#define IDC_SEARCH_2GB_RADIO            1028
+#define IDC_SEARCH_RAM_OTHER            1029
+#define IDC_SEARCH_8GB_RADIO            1030
+#define IDC_SEARCH_16GB_RADIO           1031
+#define IDC_SEARCH_RAM_OTHER_RADIO      1032
+#define IDC_SEARCH_4GB_RADIO            1033
+#define IDC_SEARCH_RAM_CONFIRM          1034
+#define IDC_SEARCH_RAM_CANCEL           1035
 #define ID_FILE_OPENBASE                32771
 #define ID_FILE_EXIT                    32772
 #define ID_32773                        32773
@@ -67,7 +78,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32797
-#define _APS_NEXT_CONTROL_VALUE         1027
+#define _APS_NEXT_CONTROL_VALUE         1036
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
