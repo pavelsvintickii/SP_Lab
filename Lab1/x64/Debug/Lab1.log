@@ -1,0 +1,12 @@
+﻿  Lab1.cpp
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(350,45): warning C4305: инициализация: усечение из "double" в "float"
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(366,48): warning C4305: *=: усечение из "double" в "float"
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(514,45): warning C4305: инициализация: усечение из "double" в "float"
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(529,48): warning C4305: *=: усечение из "double" в "float"
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(257,9): warning C4101: hdc: неиспользованная локальная переменная
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(258,17): warning C4101: ps: неиспользованная локальная переменная
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(256,27): warning C4101: wmEvent: неиспользованная локальная переменная
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(262,10): warning C4101: success: неиспользованная локальная переменная
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(256,21): warning C4101: wmId: неиспользованная локальная переменная
+C:\Users\pasha\source\repos\Lab1\Lab1\Lab1.cpp(731,43): warning C4244: =: преобразование "UINT" в "float", возможна потеря данных
+  Lab1.vcxproj -> C:\Users\pasha\source\repos\Lab1\x64\Debug\Lab1.exe
