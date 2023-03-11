@@ -139,6 +139,7 @@
     <ResourceCompile Include="Lab1.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\Downloads\41932 (3).bmp" />
     <Image Include="..\..\..\..\Downloads\free-icon-cursor-603528.ico" />
     <Image Include="icon1.ico" />
     <Image Include="Lab1.ico" />

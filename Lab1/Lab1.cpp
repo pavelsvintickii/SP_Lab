@@ -67,6 +67,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    DlgProcAdd(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    DlgProcSearchCPU(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK    DlgProcSearchRAM(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK    AnimProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -407,6 +408,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_HELP_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
+            case ID_ANIM:
+                DialogBox(hInst, MAKEINTRESOURCE(IDD_ANIM), hWnd, AnimProc);
+                break;
             case IDM_EXIT:
             case ID_FILE_EXIT:
                 DestroyWindow(hWnd);
@@ -425,6 +429,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 std::vector<information> list;
                 for (int index = 0; index < fileInfo.size(); index++)
                 {
+                    bool addFlag = false;
                     wchar_t* ram = new wchar_t[MaxLength];
                     _snwprintf(ram, MaxLength, L"%0.1f\0", fileInfo[index].memory);
                     switch (RAMFind)
@@ -434,6 +439,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         if (fabs(fileInfo[index].memory - 1.0) < 0.01)
                         {
                             list.push_back(fileInfo[index]);
+                            addFlag = true;
                         }
                         break;
                     }
@@ -442,6 +448,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         if (fabs(fileInfo[index].memory - 2.0) < 0.01)
                         {
                             list.push_back(fileInfo[index]);
+                            addFlag = true;
                         }
                         break;
                     }
@@ -450,6 +457,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         if (fabs(fileInfo[index].memory - 4.0) < 0.01)
                         {
                             list.push_back(fileInfo[index]);
+                            addFlag = true;
                         }
                         break;
                     }
@@ -458,6 +466,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         if (fabs(fileInfo[index].memory - 8.0) < 0.01)
                         {
                             list.push_back(fileInfo[index]);
+                            addFlag = true;
                         }
                         break;
                     }
@@ -466,12 +475,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         if (fabs(fileInfo[index].memory - 16.0) < 0.01)
                         {
                             list.push_back(fileInfo[index]);
+                            addFlag = true;
                         }
                         break;
                     }
                     case RAMFlags::not_selected:
                     {
                         list.push_back(fileInfo[index]);
+                        addFlag = true;
                         break;
                     }
                     default:
@@ -500,48 +511,52 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         if (fabs(fileInfo[index].memory - RAM) < 0.01)
                         {
                             list.push_back(fileInfo[index]);
+                            addFlag = true;
                         }
                         break;
                     }
                     }
-                    switch (CPUFind)
+                    if (addFlag)
                     {
-                    case CPUFlags::intel_core_i5:
-                    {
-                        if (wcsstr(fileInfo[index].CPU, L"Intel Core i-5") == NULL)
+                        switch (CPUFind)
                         {
-                            list.pop_back();
-                        }
-                        break;
-                    }
-                    case CPUFlags::intel_core_i7:
-                    {
-                        if (wcsstr(fileInfo[index].CPU, L"Intel Core i-7") == NULL)
+                        case CPUFlags::intel_core_i5:
                         {
-                            list.pop_back();
+                            if (wcsstr(fileInfo[index].CPU, L"Intel Core i-5") == NULL)
+                            {
+                                list.pop_back();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case CPUFlags::AMD:
-                    {
-                        if (wcsstr(fileInfo[index].CPU, L"AMD") == NULL)
+                        case CPUFlags::intel_core_i7:
                         {
-                            list.pop_back();
+                            if (wcsstr(fileInfo[index].CPU, L"Intel Core i-7") == NULL)
+                            {
+                                list.pop_back();
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case CPUFlags::not_selected:
-                    {
-                        break;
-                    }
-                    default:
-                    {
-                        if (wcsstr(fileInfo[index].CPU, CPUName) == NULL)
+                        case CPUFlags::AMD:
                         {
-                            list.pop_back();
+                            if (wcsstr(fileInfo[index].CPU, L"AMD") == NULL)
+                            {
+                                list.pop_back();
+                            }
+                            break;
                         }
-                        break;
-                    }
+                        case CPUFlags::not_selected:
+                        {
+                            break;
+                        }
+                        default:
+                        {
+                            if (wcsstr(fileInfo[index].CPU, CPUName) == NULL)
+                            {
+                                list.pop_back();
+                            }
+                            break;
+                        }
+                        }
                     }
                 }
                 j = 0;
@@ -579,7 +594,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-HWND hModel, hCPU, hRAM, hCost;;
+INT_PTR CALLBACK AnimProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message)
+    {
+    case WM_INITDIALOG:
+
+        return (INT_PTR)TRUE;
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDC_START_ANIM:
+            //SetTimer(hWnd, IDT_TIMER1, 50);
+            break;
+        case IDC_STOP_ANIM:
+            break;
+        case IDC_EXIT_ANIM:
+            SendMessage(hWnd, WM_CLOSE, 0, 0);
+            break;
+        }
+        return (INT_PTR)TRUE;
+    case WM_CLOSE:
+        EndDialog(hWnd, 0);
+        return (INT_PTR)TRUE;
+    }
+    return (INT_PTR)FALSE;
+}
+
+HWND hModel, hCPU, hRAM, hCost;
 
 INT_PTR CALLBACK DlgProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {

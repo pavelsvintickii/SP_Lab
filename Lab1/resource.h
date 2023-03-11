@@ -11,6 +11,8 @@
 #define IDC_POINTER                     104
 #define IDC_MYPOINTER                   104
 #define IDM_EXIT                        105
+#define IDT_TIMER1                      105
+#define IDT_TIMER                       105
 #define IDC_NODROP                      106
 #define IDI_LAB1                        107
 #define IDD_ADD                         107
@@ -18,6 +20,7 @@
 #define IDD_SEARCH_CPU                  108
 #define IDC_LAB1                        109
 #define IDD_SEARCH_RAM                  109
+#define IDD_ANIM                        110
 #define IDR_MAINFRAME                   128
 #define IDR_MENU1                       129
 #define IDR_ACCELERATOR1                130
@@ -26,6 +29,7 @@
 #define IDB_BITMAP1                     137
 #define IDI_ICON2                       138
 #define IDR_HTML1                       139
+#define IDB_BITMAP2                     143
 #define IDC_LIST1                       1000
 #define IDC_ADD_BUTTON                  1010
 #define IDC_ADD_CPU                     1011
@@ -40,7 +44,6 @@
 #define IDC_SEARCH_CPU_OTHER            1023
 #define IDC_SEARCH_CPU_CONFIRM          1024
 #define IDC_SEARCH_CPU_CANCEL           1025
-#define IDC_RAM_1GB_RADIO               1027
 #define IDC_SEARCH_1GB_RADIO            1027
 #define IDC_SEARCH_2GB_RADIO            1028
 #define IDC_SEARCH_RAM_OTHER            1029
@@ -50,6 +53,9 @@
 #define IDC_SEARCH_4GB_RADIO            1033
 #define IDC_SEARCH_RAM_CONFIRM          1034
 #define IDC_SEARCH_RAM_CANCEL           1035
+#define IDC_START_ANIM                  1036
+#define IDC_STOP_ANIM                   1037
+#define IDC_EXIT_ANIM                   1038
 #define ID_FILE_OPENBASE                32771
 #define ID_FILE_EXIT                    32772
 #define ID_32773                        32773
@@ -69,6 +75,8 @@
 #define ID_INFO_REMOVE                  32794
 #define ID_32795                        32795
 #define ID_INFO_RESET                   32796
+#define ID_32797                        32797
+#define ID_ANIM                         32798
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -76,9 +84,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        140
-#define _APS_NEXT_COMMAND_VALUE         32797
-#define _APS_NEXT_CONTROL_VALUE         1036
+#define _APS_NEXT_RESOURCE_VALUE        144
+#define _APS_NEXT_COMMAND_VALUE         32799
+#define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
