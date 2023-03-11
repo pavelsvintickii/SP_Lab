@@ -54,6 +54,9 @@
     <Image Include="..\..\..\..\Downloads\41932 (3).bmp">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="..\..\..\..\Downloads\41932_(3).bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="MYPOINTER.cur">

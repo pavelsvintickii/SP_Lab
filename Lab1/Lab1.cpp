@@ -58,6 +58,7 @@ RAMFlags RAMFind = (RAMFlags)0;
 wchar_t* RAMName = new wchar_t[MaxLength];
 CPUFlags CPUFind = (CPUFlags)0;
 wchar_t* CPUName = new wchar_t[MaxLength];
+HBITMAP hBall;
 
 // Отправить объявления функций, включенных в этот модуль кода:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -270,6 +271,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         file.nMaxFile = 256;
         file.lpstrInitialDir = _T(".\\");
         file.lpstrDefExt = _T("txt");
+        hBall = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAP3));
         break;
     case WM_COMMAND:
         {
@@ -594,20 +596,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+int x = 0, y = 0;
+bool up = false, left = false;
+RECT rect;
+HDC hdcBall;
+
 INT_PTR CALLBACK AnimProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    HDC hdc;
+    HBRUSH hBrush;
     switch (message)
     {
     case WM_INITDIALOG:
-
+        hdc = GetDC(hWnd);
+        hdcBall = CreateCompatibleDC(hdc);
+        SelectObject(hdcBall, hBall);
+        ReleaseDC(hWnd, hdc);
         return (INT_PTR)TRUE;
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
         case IDC_START_ANIM:
-            //SetTimer(hWnd, IDT_TIMER1, 50);
+            SetTimer(hWnd, 1, 50, (TIMERPROC)NULL);
             break;
         case IDC_STOP_ANIM:
+            KillTimer(hWnd, 1);
             break;
         case IDC_EXIT_ANIM:
             SendMessage(hWnd, WM_CLOSE, 0, 0);
@@ -617,6 +630,55 @@ INT_PTR CALLBACK AnimProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CLOSE:
         EndDialog(hWnd, 0);
         return (INT_PTR)TRUE;
+    case WM_TIMER:
+        switch (wParam)
+        {
+        case 1:
+            GetClientRect(hWnd, &rect);
+            rect.bottom -= 100;
+            if (x + 64 + 1 >= rect.right && !left)
+            {
+                left = !left;
+            }
+            else if (x - 1 <= rect.left && left)
+            {
+                left = !left;
+            }
+            if (y + 64 + 1 >= rect.bottom && !up)
+            {
+                up = !up;
+            }
+            else if (y - 1 <= rect.top && up)
+            {
+                up = !up;
+            }
+            if (up)
+            {
+                y--;
+            }
+            else
+            {
+                y++;
+            }
+            if (left)
+            {
+                x--;
+            }
+            else
+            {
+                x++;
+            }
+            hdc = GetDC(hWnd);
+            GetClientRect(hWnd, &rect);
+            rect.bottom -= 100;
+            hBrush = CreateSolidBrush(RGB(255, 255, 255));
+            SelectObject(hdc, hBrush);
+            Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);
+            BitBlt(hdc, x, y, 64, 64, hdcBall, 0, 0, SRCCOPY);
+            ReleaseDC(hWnd, hdc);
+            break;
+        }
+        break;
     }
     return (INT_PTR)FALSE;
 }
