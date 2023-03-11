@@ -14,6 +14,7 @@
 #define MAX_LOADSTRING 100
 #define MaxLength 256
 
+//Структура данных, которые используются в программе
 struct information
 {
     wchar_t *name = new wchar_t[MaxLength];
@@ -22,11 +23,13 @@ struct information
     int cost;
 };
 
+//Функция, определяющая, какой из элементов в массиве меньше (определяет порядок сортировки в методе sort()
 bool InfoSort(information first, information second)
 {
     return first.cost < second.cost;
 }
 
+//Тип перечисления. В данной программе используются для работы с поиском. CPUFlags отвечает за поиск процессоров, RAMFlags - объём памяти
 enum class CPUFlags
 {
     not_selected,
@@ -51,14 +54,14 @@ enum class RAMFlags
 HINSTANCE hInst;                                // текущий экземпляр
 WCHAR szTitle[MAX_LOADSTRING];                  // Текст строки заголовка
 WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса главного окна
-FILE *fileStream;
-std::vector<information> fileInfo;
+FILE *fileStream;                               // файловый поток
+std::vector<information> fileInfo;              //динамический список с информацией о компьютерах
 HWND hList1;
-RAMFlags RAMFind = (RAMFlags)0;
-wchar_t* RAMName = new wchar_t[MaxLength];
-CPUFlags CPUFind = (CPUFlags)0;
-wchar_t* CPUName = new wchar_t[MaxLength];
-HBITMAP hBall;
+RAMFlags RAMFind = (RAMFlags)0;                 // флаг радио-кнопок поиска по объёму памяти
+wchar_t* RAMName = new wchar_t[MaxLength];      // строка, содержащая текст из поля "Другое" диалогового окна поиска по объёму памяти
+CPUFlags CPUFind = (CPUFlags)0;                 // флаг радио-кнопок поиска по процессору
+wchar_t* CPUName = new wchar_t[MaxLength];      // строка, содержащая текст из поля "Другое" диалогового окна поиска по процессору
+HBITMAP hBall;                                  // дескриптор .bmp файла
 
 // Отправить объявления функций, включенных в этот модуль кода:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -91,7 +94,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
-    HACCEL hAccelTable1 = LoadAccelerators(hInstance, MAKEINTRESOURCE(130));
+    HACCEL hAccelTable1 = LoadAccelerators(hInstance, MAKEINTRESOURCE(130)); // кастомная таблица горячих клавиш
     HACCEL hAccelTable2 = LoadAccelerators(hInstance, MAKEINTRESOURCE(109));
 
     MSG msg;
@@ -248,19 +251,19 @@ void HandleWM_NOTIFY(LPARAM lParam)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    HMENU hMenu, hSubMenu;
-    POINT point;
-    int xpos, ypos, wmId, wmEvent;
-    HDC hdc;
-    PAINTSTRUCT ps;
-    static OPENFILENAME file;
+    HMENU hMenu, hSubMenu;              // дескрипторы меню и подменю
+    POINT point;                        // координаты
+    int xpos, ypos, wmId, wmEvent;      // координаты (xpos, ypos), идентификатор команды(wmId) и события (wmEvent)
+    HDC hdc;                            // дескриптор экрана
+    PAINTSTRUCT ps;                     // структура рисования
+    static OPENFILENAME file;           // структура, содержащая параметры открытия файла
     static TCHAR name[MAX_PATH];
-    static HANDLE hFile;
-    BOOL success;
+    static HANDLE hFile;                // дескриптор файла
+    BOOL success;                       
     int j = 0;
     DWORD dw = 0;
-    wchar_t text[MaxLength];
-    char filename[MAX_PATH];
+    wchar_t text[MaxLength];            // строка считанного текста из файла
+    char filename[MAX_PATH];            // имя файла
     switch (message)
     {
     case WM_CREATE:
@@ -271,7 +274,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         file.nMaxFile = 256;
         file.lpstrInitialDir = _T(".\\");
         file.lpstrDefExt = _T("txt");
-        hBall = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAP3));
+        hBall = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAP3)); // загрузка .bmp файла
         break;
     case WM_COMMAND:
         {
@@ -282,19 +285,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_FILE_OPEN:
                 file.lpstrTitle = _T("Открыть файл для чтения");
                 file.Flags = OFN_HIDEREADONLY;
-                if (!GetOpenFileName(&file)) return 1;
+                if (!GetOpenFileName(&file)) return 1; // получение имени файла
                 wcstombs(filename, file.lpstrFile, MAX_PATH);
-                if ((fileStream = fopen(filename, "r")) != NULL)
+                if ((fileStream = fopen(filename, "r")) != NULL) // если удалось открыть файл для чтения, читаем
                 {
-                    fileInfo.clear();
+                    fileInfo.clear(); // очистка списка от старых записей
                     information newElem;
-                    while (fgetws(text, MaxLength, fileStream) != NULL)
+                    while (fgetws(text, MaxLength, fileStream) != NULL) // пока не встретили EOF (конец файла)
                     {
+                        // Инициализируем новый элемент
                         int index = 0;
                         newElem.name = new wchar_t[MaxLength];
                         newElem.CPU = new wchar_t[MaxLength];
                         newElem.memory = 0;
                         newElem.cost = 0;
+                        // Находим все места вхождения сепараторов (в нашем случае '#')
                         int markIndex = 0;
                         int mark[4] = { 0, 0, 0, 0 };
                         while (text[index] != L'\n' && text[index] != L'\0')
@@ -315,24 +320,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         wmemcpy(newElem, text, MaxLength);
                         fileInfo.push_back(newElem);
                         */
+                        // Парсим строку на отдельные элементы и записываем их в соответствующие поля нового элемента
                         markIndex = 0;
-                        wchar_t* part = new wchar_t[MaxLength];
                         wchar_t* pred;
                         wchar_t* cutName;
                         wchar_t* cutCPU;
                         wchar_t* cutMemory;
+                        // Имя компьютера - строка
+                        wchar_t* part = new wchar_t[MaxLength];
                         memccpy(part, text, L'#', MaxLength);
                         pred = wmemchr(text, L'#', MaxLength);
                         cutName = wmemchr(pred, pred[1], MaxLength);
                         part[mark[markIndex]] = L'\0';
                         markIndex++;
                         wmemcpy(newElem.name, part, MaxLength);
+                        // Процессор - строка
                         part = new wchar_t[MaxLength];
                         memccpy(part, cutName, L'#', MaxLength);
                         pred = wmemchr(cutName, L'#', MaxLength);
                         cutCPU = wmemchr(pred, pred[1], MaxLength);
                         part[mark[markIndex]] = L'\0';
                         wmemcpy(newElem.CPU, part, MaxLength);
+                        // Объём памяти - число с плавающей точкой
                         part = new wchar_t[MaxLength];
                         memccpy(part, cutCPU, L'#', MaxLength);
                         pred = wmemchr(cutCPU, L'#', MaxLength);
@@ -340,6 +349,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         index = 0;
                         float multiply = 0.1;
                         bool decimalPoint = false;
+                        // Ручной перевод строки в число с плавающей точкой до первого не числового символа
                         while ((part[index] <= L'9' && part[index] >= L'0') || part[index] == L'.')
                         {
                             if (part[index] == L'.')
@@ -358,51 +368,58 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             index++;
                         }
                         index = 0;
+                        // Остаток строки является ценой - целым числом. Ручной перевод из строки в целое число до первого нечислового символа
                         while (cutMemory[index] <= L'9' && cutMemory[index] >= L'0')
                         {
                             newElem.cost = (newElem.cost * 10) + cutMemory[index] - L'0';
                             index++;
                         }
-                        fileInfo.push_back(newElem);
+                        fileInfo.push_back(newElem);        // добавление элемента в конец списка
                     }
+                    // Объявляем недействительным изображение в окне и запрашиваем перерисовку
                     InvalidateRect(hWnd, NULL, TRUE);
                     UpdateWindow(hWnd);
                 }
-                if (fileStream) fclose(fileStream);
+                if (fileStream) fclose(fileStream);     // Закрываем поток!!!
                 break;
             case ID_FILE_SAVE:
                 file.lpstrTitle = _T("Сохранить файл как...");
                 file.Flags = OFN_HIDEREADONLY;
-                if (!GetOpenFileName(&file)) return 1;
+                if (!GetOpenFileName(&file)) return 1; // Получение имени файла
                 wcstombs(filename, file.lpstrFile, MAX_PATH);
-                if ((fileStream = fopen(filename, "w")) != NULL)
+                if ((fileStream = fopen(filename, "w")) != NULL) // Если открыли для записи файл, то записываем
                 {
                     for (int index = 0; index < fileInfo.size(); index++)
                     {
-                        fwprintf(fileStream,L"%s#%s#%0.1f#%d\n",fileInfo[index].name,fileInfo[index].CPU,fileInfo[index].memory,fileInfo[index].cost);
+                        fwprintf(fileStream,L"%s#%s#%0.1f#%d\n",fileInfo[index].name,fileInfo[index].CPU,fileInfo[index].memory,fileInfo[index].cost); // записываем в том же формате, что и читаем!!!
                     }
-                    fileInfo.clear();
+                    fileInfo.clear(); // Очищаем список от записаных данных
                 }
-                if (fileStream) fclose(fileStream);
+                if (fileStream) fclose(fileStream); // Освобождаем поток!!!
                 break;
             case ID_INFO_ADD:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ADD), hWnd, DlgProcAdd);
+                DialogBox(hInst, MAKEINTRESOURCE(IDD_ADD), hWnd, DlgProcAdd); // Вызываем диалоговое окно IDD_ADD, сообщения которого будет обрабатывать процедура DlgProcAdd
+                // Объявляем недействительным изображение в окне и запрашиваем перерисовку
                 InvalidateRect(hWnd, NULL, TRUE);
                 UpdateWindow(hWnd);
                 break;
             case ID_INFO_CPU_TYPE:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_SEARCH_CPU), hWnd, DlgProcSearchCPU);
+                DialogBox(hInst, MAKEINTRESOURCE(IDD_SEARCH_CPU), hWnd, DlgProcSearchCPU);  // Вызываем диалоговое окно IDD_SEARCH_CPU, сообщения которого будет обрабатывать процедура DlgProcSearchCPU
+                // Объявляем недействительным изображение в окне и запрашиваем перерисовку
                 InvalidateRect(hWnd, NULL, TRUE);
                 UpdateWindow(hWnd);
                 break;
             case ID_INFO_RAM:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_SEARCH_RAM), hWnd, DlgProcSearchRAM);
+                DialogBox(hInst, MAKEINTRESOURCE(IDD_SEARCH_RAM), hWnd, DlgProcSearchRAM);  // Вызываем диалоговое окно IDD_SEARCH_RAM, сообщения которого будет обрабатывать процедура DlgProcSearchRAM
+                // Объявляем недействительным изображение в окне и запрашиваем перерисовку
                 InvalidateRect(hWnd, NULL, TRUE);
                 UpdateWindow(hWnd);
                 break;
             case ID_INFO_RESET:
+                // Сбрасываем параметры поиска
                 CPUFind = CPUFlags::not_selected;
                 RAMFind = RAMFlags::not_selected;
+                // Объявляем недействительным изображение в окне и запрашиваем перерисовку
                 InvalidateRect(hWnd, NULL, TRUE);
                 UpdateWindow(hWnd);
                 break;
@@ -411,6 +428,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
             case ID_ANIM:
+                // Вызываем окно с анимацией
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ANIM), hWnd, AnimProc);
                 break;
             case IDM_EXIT:
@@ -422,23 +440,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+    // Отрисовываем основное окно
     case WM_PAINT:
         {            
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             if (fileInfo.size() != 0)
             {
-                std::vector<information> list;
+                std::vector<information> list; // конечный список, который надо отобразить
                 for (int index = 0; index < fileInfo.size(); index++)
                 {
-                    bool addFlag = false;
+                    bool addFlag = false; // добавили ли мы текущий элемент в конечный список для отображения
                     wchar_t* ram = new wchar_t[MaxLength];
                     _snwprintf(ram, MaxLength, L"%0.1f\0", fileInfo[index].memory);
+                    // Проверяем, подходит ли элемент по первому критерию. Если подходит - добавляем
                     switch (RAMFind)
                     {
                     case RAMFlags::GB1:
                     {
-                        if (fabs(fileInfo[index].memory - 1.0) < 0.01)
+                        if (fabs(fileInfo[index].memory - 1.0) < 0.01) // сравнение чисел с плавающей точкой необходимо делать через модуль разности двух чисел
                         {
                             list.push_back(fileInfo[index]);
                             addFlag = true;
@@ -447,7 +467,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     case RAMFlags::GB2:
                     {
-                        if (fabs(fileInfo[index].memory - 2.0) < 0.01)
+                        if (fabs(fileInfo[index].memory - 2.0) < 0.01) // сравнение чисел с плавающей точкой необходимо делать через модуль разности двух чисел
                         {
                             list.push_back(fileInfo[index]);
                             addFlag = true;
@@ -456,7 +476,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     case RAMFlags::GB4:
                     {
-                        if (fabs(fileInfo[index].memory - 4.0) < 0.01)
+                        if (fabs(fileInfo[index].memory - 4.0) < 0.01) // сравнение чисел с плавающей точкой необходимо делать через модуль разности двух чисел
                         {
                             list.push_back(fileInfo[index]);
                             addFlag = true;
@@ -465,7 +485,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     case RAMFlags::GB8:
                     {
-                        if (fabs(fileInfo[index].memory - 8.0) < 0.01)
+                        if (fabs(fileInfo[index].memory - 8.0) < 0.01) // сравнение чисел с плавающей точкой необходимо делать через модуль разности двух чисел
                         {
                             list.push_back(fileInfo[index]);
                             addFlag = true;
@@ -474,7 +494,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     case RAMFlags::GB16:
                     {
-                        if (fabs(fileInfo[index].memory - 16.0) < 0.01)
+                        if (fabs(fileInfo[index].memory - 16.0) < 0.01) // сравнение чисел с плавающей точкой необходимо делать через модуль разности двух чисел
                         {
                             list.push_back(fileInfo[index]);
                             addFlag = true;
@@ -510,7 +530,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             }
                             indexRam++;
                         }
-                        if (fabs(fileInfo[index].memory - RAM) < 0.01)
+                        if (fabs(fileInfo[index].memory - RAM) < 0.01) // сравнение чисел с плавающей точкой необходимо делать через модуль разности двух чисел
                         {
                             list.push_back(fileInfo[index]);
                             addFlag = true;
@@ -518,8 +538,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         break;
                     }
                     }
-                    if (addFlag)
+                    if (addFlag) // если по предыдущему критерию элемент подходит для отображения
                     {
+                        // Проверяем второй критерий. Если не подходит - убираем
                         switch (CPUFind)
                         {
                         case CPUFlags::intel_core_i5:
@@ -562,7 +583,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                 }
                 j = 0;
-                std::sort(list.begin(), list.end(), InfoSort);
+                std::sort(list.begin(), list.end(), InfoSort); // Сортируем список. Указываем на начало и конец списка, а также сообщаем, какой процедурой сравнивать элементы
+                // Выводим на экран в виде текста информацию из списка, прошедшие через фильтрацию по процессору и объёму памяти
                 for (int index = 0; index < list.size(); index++)
                 {
                     wchar_t* textOut = new wchar_t[MaxLength];
@@ -575,6 +597,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             EndPaint(hWnd, &ps);
         }
         break;
+    // Контекстное меню
     case WM_RBUTTONDOWN:
         {
             point.x = LOWORD(lParam);
@@ -601,26 +624,27 @@ bool up = false, left = false;
 RECT rect;
 HDC hdcBall;
 
+//Процедура обработки сообщений в диалоговом окне "Анимация"
 INT_PTR CALLBACK AnimProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HDC hdc;
-    HBRUSH hBrush;
+    HBRUSH hBrush; // дескриптор кисти
     switch (message)
     {
     case WM_INITDIALOG:
         hdc = GetDC(hWnd);
-        hdcBall = CreateCompatibleDC(hdc);
-        SelectObject(hdcBall, hBall);
+        hdcBall = CreateCompatibleDC(hdc); // создаём виртуальное совместимое с текущим экраном устройство
+        SelectObject(hdcBall, hBall); // выбираем объект, находящийся в виртуальном устройстве
         ReleaseDC(hWnd, hdc);
         return (INT_PTR)TRUE;
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
         case IDC_START_ANIM:
-            SetTimer(hWnd, 1, 50, (TIMERPROC)NULL);
+            SetTimer(hWnd, 1, 5, (TIMERPROC)NULL); // установка таймера. (дескриптор окна, идентификатор таймера, время, срабатывающая процедура). Если последний параметр NULL - обработка идёт в WM_TIMER
             break;
         case IDC_STOP_ANIM:
-            KillTimer(hWnd, 1);
+            KillTimer(hWnd, 1); // остановка таймера. (дескриптор окна, идентификатор таймера)
             break;
         case IDC_EXIT_ANIM:
             SendMessage(hWnd, WM_CLOSE, 0, 0);
@@ -634,8 +658,9 @@ INT_PTR CALLBACK AnimProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         switch (wParam)
         {
         case 1:
-            GetClientRect(hWnd, &rect);
-            rect.bottom -= 100;
+            GetClientRect(hWnd, &rect); // координаты, описывающее окно
+            rect.bottom -= 100; // отсекаем нижних 100 пикселей от окна для дальнейшей обработки
+            // Проверяем, не выйдет ли мяч за пределы поля
             if (x + 64 + 1 >= rect.right && !left)
             {
                 left = !left;
@@ -652,6 +677,7 @@ INT_PTR CALLBACK AnimProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
                 up = !up;
             }
+            // Редактируем координаты левого верхнего угла картинки мяча
             if (up)
             {
                 y--;
@@ -669,12 +695,10 @@ INT_PTR CALLBACK AnimProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 x++;
             }
             hdc = GetDC(hWnd);
-            GetClientRect(hWnd, &rect);
-            rect.bottom -= 100;
-            hBrush = CreateSolidBrush(RGB(255, 255, 255));
-            SelectObject(hdc, hBrush);
-            Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);
-            BitBlt(hdc, x, y, 64, 64, hdcBall, 0, 0, SRCCOPY);
+            hBrush = CreateSolidBrush(RGB(255, 255, 255)); // создаём кисть
+            SelectObject(hdc, hBrush); // выбираем кисть
+            Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); //рисуем кистью прямоугольник
+            BitBlt(hdc, x, y, 64, 64, hdcBall, 0, 0, SRCCOPY); // рисуем картинку с виртуального устройства в окно
             ReleaseDC(hWnd, hdc);
             break;
         }
@@ -685,11 +709,13 @@ INT_PTR CALLBACK AnimProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 HWND hModel, hCPU, hRAM, hCost;
 
+// Процедура обработки сообщений окна "Добавление нового ПК"
 INT_PTR CALLBACK DlgProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
     case WM_INITDIALOG:
+        // Получаем дескрипторы полей ввода данных
         hModel = GetDlgItem(hWnd, IDC_ADD_MODEL);
         hCPU = GetDlgItem(hWnd, IDC_ADD_CPU);
         hRAM = GetDlgItem(hWnd, IDC_ADD_RAM);
@@ -698,6 +724,7 @@ INT_PTR CALLBACK DlgProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
     case WM_COMMAND:
         if (LOWORD(wParam) == IDC_ADD_BUTTON)
         {
+            // Создаём новый элемент и добавляем в список
             information newElem = { new wchar_t[MaxLength], new wchar_t[MaxLength], 0, 0 };
             GetDlgItemText(hWnd, IDC_ADD_MODEL, newElem.name, MaxLength);
             GetDlgItemText(hWnd, IDC_ADD_CPU, newElem.CPU, MaxLength);
@@ -722,6 +749,7 @@ HWND hText;
 RAMFlags RAMFindNew = (RAMFlags)0;
 CPUFlags CPUFindNew = (CPUFlags)0;
 
+// Процедура обработки сообщений окна "Поиск по процессору"
 INT_PTR CALLBACK DlgProcSearchCPU(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -767,6 +795,7 @@ INT_PTR CALLBACK DlgProcSearchCPU(HWND hWnd, UINT message, WPARAM wParam, LPARAM
     return (INT_PTR)FALSE;
 }
 
+//Процедура обработки сообщений окна "Поиск по объёму памяти"
 INT_PTR CALLBACK DlgProcSearchRAM(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
